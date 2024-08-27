@@ -1,39 +1,34 @@
 /* eslint-disable max-classes-per-file */
 
 export class AppError extends Error {
-  constructor(message, status) {
+  /**
+   * @param {String} message Descrição do que causou o erro
+   * @param {Number} status  Código de status http
+   * @param {*} type Um resumo do tipo do erro
+   */
+  constructor(message, status, type) {
     super(message);
-    this.status = status;
     this.error = true;
-  }
-
-  toJson() {
-    const jsonObj = {
-      message: this.message,
-    };
-
-    Object.keys(this).forEach((key) => {
-      jsonObj[key] = this[key];
-    });
-
-    return jsonObj;
+    this.status = status;
+    this.type = type;
+    this.msg = this.message;
   }
 }
 
 export class NotFoundError extends AppError {
   constructor(message) {
-    super(message, 404);
+    super(message, 404, 'Not Found');
   }
 }
 
 export class InternalServerError extends AppError {
   constructor(message) {
-    super(message, 500);
+    super(message, 500, 'Internal Server Error');
   }
 }
 
 export class ServiceUnavailableError extends AppError {
   constructor(message) {
-    super(message, 503);
+    super(message, 503, 'Service Unavailable');
   }
 }

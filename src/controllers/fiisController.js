@@ -6,7 +6,7 @@ const getAll = asyncHandler(async (_req, res) => {
   const result = await fiisModel.select('*').exec();
 
   if (result.length === 0) {
-    throw new NotFoundError('Nenhum fundo cadastrado.');
+    throw new NotFoundError('Não existe nenhum fundo cadastrado.');
   }
   res.status(200).json(result);
 });
