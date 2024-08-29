@@ -1,5 +1,5 @@
 import asyncHandler from 'express-async-handler';
-import { NotFoundError, ServiceUnavailableError } from '../utils/AppErrors.js';
+import { BadRequestError, NotFoundError, ServiceUnavailableError } from '../utils/AppErrors.js';
 import fiisModel from '../models/fiisModel.js';
 
 const getAll = asyncHandler(async (_req, res) => {
@@ -13,6 +13,10 @@ const getAll = asyncHandler(async (_req, res) => {
 
 const getOne = asyncHandler(async (req, res) => {
   const { ticker } = req.params;
+
+  if (ticker.length !== 6) {
+    throw new BadRequestError(`"${ticker}" não é um ticker válido.`)
+  }
 
   throw new ServiceUnavailableError('Método e rota ainda não implementados.');
 });
