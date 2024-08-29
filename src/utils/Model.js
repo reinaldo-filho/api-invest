@@ -14,9 +14,22 @@ class Model {
   #operation;
   #columns;
   #where;
+  #params;
 
   constructor(table) {
     this.table = table;
+  }
+
+  /**
+   * Restaura as todas opções do modelo para o padrão.
+   * @returns {Model}
+   */
+  reset() {
+    this.#operation = '';
+    this.#columns = [];
+    this.#where = '';
+    this.#params = null;    
+    return this;
   }
 
   /**
@@ -36,9 +49,29 @@ class Model {
    * @param {string} condition A condição imposta
    * @returns {Model}
    */
-  where(condition) {
+  where(condition, params) {
+    if (params.length > 0) {
+      this.params(params);
+    }
+
     if (condition) {
       this.#where = condition;
+    }
+
+    return this;
+  }
+
+  /**
+   * Valor de substituição de cada parâmetro. Ex: $1, $2, ...
+   * @param {Array | *} values
+   * @returns {Model}
+   */
+  params(values) {
+    if (Array.isArray(values)) {
+      if (values.length === 0) return this;
+      this.#params.push(...values);
+    } else {
+      this.#params.push(values);
     }
 
     return this;
@@ -55,7 +88,8 @@ class Model {
       sql.push(this.#where);
     }
 
-    const { rows } = await pool.query(sql.join(' '));
+    const { rows } = await pool.query(sql.join(' '), ...this.#params);
+    this.reset();
 
     return rows;
   }
