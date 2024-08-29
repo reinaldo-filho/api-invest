@@ -15,7 +15,7 @@ const getOne = asyncHandler(async (req, res) => {
   const { ticker } = req.params;
 
   if (!/[a-z]{4}11$/i.test(ticker)) {
-    throw new BadRequestError(`"${ticker}" não é um ticker válido.`);
+    throw new BadRequestError(`${ticker} não é um ticker válido.`);
   }
 
   const result = await fiisModel
@@ -25,7 +25,7 @@ const getOne = asyncHandler(async (req, res) => {
 
   if (result.length === 0) {
     throw new NotFoundError(
-      `O fundo de investimento "${ticker}" não foi encontrado.`,
+      `O fundo de investimento ${ticker} não foi encontrado.`,
     );
   }
 
