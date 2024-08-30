@@ -1,6 +1,6 @@
 import asyncHandler from 'express-async-handler';
-import { BadRequestError, NotFoundError, ServiceUnavailableError } from '../utils/AppErrors.js';
 import fiisModel from '../models/fiisModel.js';
+import { BadRequestError, NotFoundError } from '../utils/AppErrors.js';
 
 const getAll = asyncHandler(async (_req, res) => {
   const result = await fiisModel.select('*').exec();
@@ -14,11 +14,22 @@ const getAll = asyncHandler(async (_req, res) => {
 const getOne = asyncHandler(async (req, res) => {
   const { ticker } = req.params;
 
-  if (ticker.length !== 6) {
-    throw new BadRequestError(`"${ticker}" não é um ticker válido.`)
+  if (!/[a-z]{4}11$/i.test(ticker)) {
+    throw new BadRequestError(`${ticker} não é um ticker válido.`);
   }
 
-  throw new ServiceUnavailableError('Método e rota ainda não implementados.');
+  const result = await fiisModel
+    .select('*')
+    .where('ticker = $1', [ticker])
+    .exec();
+
+  if (result.length === 0) {
+    throw new NotFoundError(
+      `O fundo de investimento ${ticker} não foi encontrado.`,
+    );
+  }
+
+  res.status(200).json(result);
 });
 
 export default {

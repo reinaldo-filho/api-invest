@@ -14,9 +14,23 @@ class Model {
   #operation;
   #columns;
   #where;
+  #params;
 
   constructor(table) {
     this.table = table;
+    this.reset();
+  }
+
+  /**
+   * Restaura as todas opções do modelo para o padrão.
+   * @returns {Model}
+   */
+  reset() {
+    this.#operation = '';
+    this.#columns = [];
+    this.#where = '';
+    this.#params = [];
+    return this;
   }
 
   /**
@@ -25,21 +39,43 @@ class Model {
    * @returns {Model}
    */
   select(columns) {
-    this.#operation = 'SELECT';
     this.#columns = normalizeColumns(columns);
+    this.#operation = 'SELECT';
 
     return this;
   }
 
   /**
    * Define a seção Where da pesquisa ou condição para exclusão/alteração
-   * @param {string} condition A condição imposta
+   * @param {String} condition A condição imposta
+   * @param {Array} params Atribui valores para serem usados como parametros. Ex: $1, $2, ...
    * @returns {Model}
    */
-  where(condition) {
-    if (condition) {
-      this.#where = condition;
+  where(condition, params) {
+    if (typeof condition !== 'string')
+      throw TypeError('{condition} deve ser do tipo string');
+    if (params !== undefined && !Array.isArray(params))
+      throw TypeError('{params} deve ser do tipo Array');
+
+    if (params !== undefined) {
+      this.params(params);
     }
+
+    this.#where = condition;
+
+    return this;
+  }
+
+  /**
+   * Valor de substituição de cada parâmetro. Ex: $1, $2, ...
+   * @param {Array} values
+   * @returns {Model}
+   */
+  params(values) {
+    if (!Array.isArray(values))
+      throw new TypeError('{values} deve ser do tipo Array');
+
+    this.#params.push(...values);
 
     return this;
   }
@@ -52,12 +88,22 @@ class Model {
     sql.push(`FROM ${this.table}`);
 
     if (this.#where) {
-      sql.push(this.#where);
+      sql.push(`WHERE ${this.#where}`);
     }
 
-    const { rows } = await pool.query(sql.join(' '));
+    const sqlStr = sql.join(' ');
+    console.log(sqlStr);
 
-    return rows;
+    let result;
+    if (/\$\d+/g.test(sqlStr)) {
+      result = await pool.query(sqlStr, this.#params);
+    } else {
+      result = await pool.query(sqlStr);
+    }
+
+    this.reset();
+
+    return result.rows;
   }
 }
 
