@@ -51,7 +51,7 @@ class Model {
    * @param {Array} params Atribui valores para serem usados como parametros. Ex: $1, $2, ...
    * @returns {Model}
    */
-  where(condition, params) {
+  where(condition, params = []) {
     if (typeof condition !== 'string')
       throw TypeError('{condition} deve ser do tipo string');
     if (params !== undefined && !Array.isArray(params))
