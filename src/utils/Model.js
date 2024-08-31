@@ -46,8 +46,26 @@ class Model {
   }
 
   /**
+   *
+   * @param {string[] | string} columns
+   * @param {any[]} params
+   * @returns
+   */
+  insert(columns, params) {
+    if (!columns)
+      throw new Error('{columns} deve referenciar uma ou mais colunas');
+    if (!Array.isArray(params))
+      throw new TypeError('{params} deve ser do tipo Array');
+
+    this.#columns = normalizeColumns(columns);
+    this.#operation = 'INSERT';
+
+    return this;
+  }
+
+  /**
    * Define a seção Where da pesquisa ou condição para exclusão/alteração
-   * @param {String} condition A condição imposta
+   * @param {string} condition A condição imposta
    * @param {Array} params Atribui valores para serem usados como parametros. Ex: $1, $2, ...
    * @returns {Model}
    */

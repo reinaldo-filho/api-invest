@@ -32,7 +32,12 @@ const getOne = asyncHandler(async (req, res) => {
   res.status(200).json(result);
 });
 
+const create = asyncHandler(async (req, res) => {
+  throw new Error('nao implementasdo');
+});
+
 export default {
   getAll,
   getOne,
+  create,
 };
