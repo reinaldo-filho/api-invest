@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import pool from '../db/pool.js';
 
 function normalizeColumns(columns) {
@@ -10,15 +11,62 @@ function normalizeColumns(columns) {
   return ['*'];
 }
 
+/**
+ * Classe de configuração para ser usada nas querys
+ */
+class QueryConfig {
+  constructor(text, values) {
+    this.text = text;
+    this.values = values;
+  }
+}
+
+/**
+ * Classe base para todos os modelos de dados
+ */
 class Model {
   #operation;
-  #columns;
-  #where;
-  #params;
+  #selectColumns;
+  #whereCondition;
+  #whereParams;
+  #insertColumns;
+  #insertValues;
 
   constructor(table) {
     this.table = table;
     this.reset();
+  }
+
+  #buildSQLSelect() {
+    const sql = [];
+
+    sql.push(`SELECT ${this.#selectColumns.join(', ')}`);
+    sql.push(`FROM ${this.table}`);
+
+    if (this.#whereCondition) sql.push(`WHERE ${this.#whereCondition}`);
+
+    const text = sql.join(' ');
+    const values = this.#whereParams;
+
+    return new QueryConfig(text, values);
+  }
+
+  #buildSQLInsert() {
+    const sql = [];
+
+    sql.push(`INSERT INTO ${this.table}`);
+
+    if (this.#insertColumns.length > 0)
+      sql.push(`(${this.#insertColumns.join(', ')})`);
+
+    const params = [];
+    for (let i = 1; i <= this.#insertValues.length; i += 1) params.push(`$${i}`);
+    sql.push(`VALUES (${params.join(', ')})`);
+
+    const text = sql.join(' ');
+    const values = this.#insertValues;
+
+    return new QueryConfig(text, values);
   }
 
   /**
@@ -27,37 +75,46 @@ class Model {
    */
   reset() {
     this.#operation = '';
-    this.#columns = [];
-    this.#where = '';
-    this.#params = [];
+    this.#selectColumns = [];
+    this.#whereCondition = '';
+    this.#whereParams = [];
+    this.#insertColumns = [];
+    this.#insertValues = [];
     return this;
   }
 
   /**
    * Operação SELECT
-   * @param {Array<string> | string} columns O nome da(s) colunas. Pode ser um array ou uma string separada por , ; ou |
+   * @param {string | string[]} [columns] O nome da(s) colunas. Pode ser um array ou uma string separada por , ; ou |
    * @returns {Model}
    */
   select(columns) {
-    this.#columns = normalizeColumns(columns);
+    this.#selectColumns = normalizeColumns(columns);
     this.#operation = 'SELECT';
 
     return this;
   }
 
   /**
-   *
-   * @param {string[] | string} columns
-   * @param {any[]} params
-   * @returns
+   * Operação INSERT
+   * @param {Object| any[]} values Objeto pares "coluna = valor" ou um Array de valores (caso não for informar as colunas)
+   * @returns {Model}
    */
-  insert(columns, params) {
-    if (!columns)
-      throw new Error('{columns} deve referenciar uma ou mais colunas');
-    if (!Array.isArray(params))
-      throw new TypeError('{params} deve ser do tipo Array');
+  insert(values) {
+    if (!(values instanceof Object))
+      throw new TypeError(
+        '{values} deve ser um objeto com pares "columna = valor" ou um Array de valores',
+      );
 
-    this.#columns = normalizeColumns(columns);
+    if (Array.isArray(values)) {
+      this.#insertValues.push(values);
+    } else {
+      Object.keys(values).forEach((property) => {
+        this.#insertColumns.push(property);
+        this.#insertValues.push(values[property]);
+      });
+    }
+
     this.#operation = 'INSERT';
 
     return this;
@@ -66,58 +123,43 @@ class Model {
   /**
    * Define a seção Where da pesquisa ou condição para exclusão/alteração
    * @param {string} condition A condição imposta
-   * @param {Array} params Atribui valores para serem usados como parametros. Ex: $1, $2, ...
+   * @param {any[]} [params] Atribui valores para serem usados como parametros. Ex: $1, $2, ...
    * @returns {Model}
    */
-  where(condition, params = []) {
+  where(condition, params) {
     if (typeof condition !== 'string')
       throw TypeError('{condition} deve ser do tipo string');
     if (params !== undefined && !Array.isArray(params))
       throw TypeError('{params} deve ser do tipo Array');
 
-    if (params !== undefined) {
-      this.params(params);
+    this.#whereCondition = condition;
+    if (params) {
+      this.#whereParams.push(params);
     }
-
-    this.#where = condition;
 
     return this;
   }
 
   /**
-   * Valor de substituição de cada parâmetro. Ex: $1, $2, ...
-   * @param {Array} values
-   * @returns {Model}
+   * Executa a operação com os parâmetros previamente configurados
+   * @returns {Promise<Object[]>} Retorna as linhas do banco ou um array vazio dependendo de cada operação
    */
-  params(values) {
-    if (!Array.isArray(values))
-      throw new TypeError('{values} deve ser do tipo Array');
-
-    this.#params.push(...values);
-
-    return this;
-  }
-
   async exec() {
-    const sql = [];
+    let query = new QueryConfig();
 
-    sql.push(this.#operation);
-    sql.push(this.#columns.join(', '));
-    sql.push(`FROM ${this.table}`);
-
-    if (this.#where) {
-      sql.push(`WHERE ${this.#where}`);
+    switch (this.#operation) {
+      case 'SELECT':
+        query = this.#buildSQLSelect();
+        break;
+      case 'INSERT':
+        query = this.#buildSQLInsert();
+        break;
+      default:
+        break;
     }
 
-    const sqlStr = sql.join(' ');
-    console.log(sqlStr);
-
-    let result;
-    if (/\$\d+/g.test(sqlStr)) {
-      result = await pool.query(sqlStr, this.#params);
-    } else {
-      result = await pool.query(sqlStr);
-    }
+    console.info('Executando query: ', query);
+    const result = await pool.query(query);
 
     this.reset();
 

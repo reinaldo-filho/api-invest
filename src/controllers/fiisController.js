@@ -20,7 +20,7 @@ const getOne = asyncHandler(async (req, res) => {
 
   const result = await fiisModel
     .select('*')
-    .where('ticker = $1', [ticker])
+    .where('ticker = $1', [ticker.toUpperCase()])
     .exec();
 
   if (result.length === 0) {
@@ -33,7 +33,19 @@ const getOne = asyncHandler(async (req, res) => {
 });
 
 const create = asyncHandler(async (req, res) => {
-  throw new Error('nao implementasdo');
+  const { id, name, numCnpj } = req.body;
+
+  const values = {
+    ticker: id,
+    nome: name,
+    cnpj: numCnpj
+  }
+
+  const result = await fiisModel
+    .insert(values)
+    .exec();
+
+  res.status(201).json(result);
 });
 
 export default {
