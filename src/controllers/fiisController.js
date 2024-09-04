@@ -12,7 +12,8 @@ const getAll = asyncHandler(async (_req, res) => {
 });
 
 const getOne = asyncHandler(async (req, res) => {
-  const { ticker } = req.params;
+  let { ticker } = req.params;
+  ticker = ticker.toUpperCase();
 
   if (!/[a-z]{4}11$/i.test(ticker)) {
     throw new BadRequestError(`${ticker} não é um ticker válido.`);
@@ -20,7 +21,7 @@ const getOne = asyncHandler(async (req, res) => {
 
   const result = await fiisModel
     .select('*')
-    .where('ticker = $1', [ticker.toUpperCase()])
+    .where('ticker = $1', [ticker])
     .exec();
 
   if (result.length === 0) {

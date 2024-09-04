@@ -134,7 +134,7 @@ class Model {
 
     this.#whereCondition = condition;
     if (params) {
-      this.#whereParams.push(params);
+      this.#whereParams = params;
     }
 
     return this;
@@ -158,10 +158,12 @@ class Model {
         break;
     }
 
+    // limpa todas as configurações antes de realizar a query
+    // caso um erro ocorra, todas as conf. já estarão limpas
+    this.reset();
+
     console.info('Executando query: ', query);
     const result = await pool.query(query);
-
-    this.reset();
 
     return result.rows;
   }
