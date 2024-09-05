@@ -1,6 +1,6 @@
 import pg from 'pg';
 import { AppError, InternalServerError } from '../utils/AppErrors.js';
-import config from '../config/constants.js';
+import config from '../config/index.js';
 
 export default (err, _req, res, _next) => {
   res.setHeader('Content-Type', 'application/problem+json');
