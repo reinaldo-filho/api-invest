@@ -1,6 +1,7 @@
 import asyncHandler from 'express-async-handler';
 import fiisModel from '../models/fiisModel.js';
 import { BadRequestError, NotFoundError } from '../utils/AppErrors.js';
+import { clearUndefined } from '../utils/utils.js';
 
 const getAll = asyncHandler(async (_req, res) => {
   const result = await fiisModel.select('*').exec();
@@ -36,11 +37,13 @@ const getOne = asyncHandler(async (req, res) => {
 const create = asyncHandler(async (req, res) => {
   const { id, name, numCnpj } = req.body;
 
-  const values = {
+  const valuesMap = {
     ticker: id,
     nome: name,
     cnpj: numCnpj
   }
+
+  const values = clearUndefined(valuesMap);
 
   const result = await fiisModel
     .insert(values)
