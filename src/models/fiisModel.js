@@ -1,5 +1,3 @@
-import Model from '../utils/Model.js';
+import db from '../db/index.js';
 
-const fiisModel = new Model('fundos');
-
-export default fiisModel;
+export default () => db.table('fiis');

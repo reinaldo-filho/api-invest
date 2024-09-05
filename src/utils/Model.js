@@ -107,7 +107,7 @@ class Model {
       );
 
     if (Array.isArray(values)) {
-      this.#insertValues.push(values);
+      this.#insertValues = values;
     } else {
       Object.keys(values).forEach((property) => {
         this.#insertColumns.push(property);
