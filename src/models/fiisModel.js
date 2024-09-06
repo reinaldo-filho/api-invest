@@ -1,3 +1,11 @@
 import db from '../db/index.js';
 
-export default () => db.table('fiis');
+
+
+
+const Fiis = () => db('fiis');
+
+export default Fiis;
+
+
+//export default () => db.table('fiis');
