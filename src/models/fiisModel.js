@@ -10,9 +10,27 @@ class FiisModel {
     return db(this.table);
   }
 
+<<<<<<< HEAD
   async getAll() {
     const result = await this.query().select('*').orderBy('ticker');
     return updateTimeZone(result);
+=======
+  /**
+   * @typedef {Object} Options 
+   * @property {number} [page]
+   * @property {number} [limit]
+   * @returns 
+   */
+
+
+  /**
+   * 
+   * @param {Options} options 
+   * @returns 
+   */
+  getAll(options = {}) {
+    return this.query().select('*').orderBy('ticker');
+>>>>>>> d03d1d36bde9e15d26ad7d61d56ca5118441b029
   }
 
   async getOne(ticker) {
