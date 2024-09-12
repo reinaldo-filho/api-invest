@@ -5,8 +5,8 @@ import { BadRequestError, NotFoundError } from '../utils/AppErrors.js';
 import fiisModel from '../models/fiisModel.js';
 import { tickerIsValid } from '../utils/utils.js';
 
-const getAll = asyncHandler(async (_req, res) => {
-  const result = await fiisModel.getAll({});
+const getAll = asyncHandler(async (req, res) => {
+  const result = await fiisModel.getAll(req.query);
 
   if (result.length === 0)
     throw new NotFoundError('Não existe nenhum fundo cadastrado.');

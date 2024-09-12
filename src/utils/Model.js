@@ -1,4 +1,5 @@
 import db from '../db/index.js';
+import { updateTimeZone } from '../utils/utils.js';
 
 export default class Model {
   /**
