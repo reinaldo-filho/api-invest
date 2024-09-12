@@ -1,11 +1,24 @@
+/* eslint-disable import/prefer-default-export */
 
 /**
- * Converte o tempo universal para o timezone local.
- * @param {string} datetime 
- * @returns {string}
+ * Verifica se a sigla é um ticker válido
+ * @param {string} ticker
+ * @returns {boolean}
  */
-const toLocalTimeZone = (datetime) => new Date(datetime).toLocaleString();
+export function tickerIsValid(ticker) {
+  return /[a-z]{4}11$/i.test(ticker);
+}
 
-export default {
-  toLocalTimeZone,
-};
+/**
+ * Converte o tempo universal para o timezone local nos capos created_at e updated_at.
+ * @param {Object[]} records Array com os registros recuperados do banco de dados 
+ * @returns {Object[]}
+ */
+export function updateTimeZone (records) {
+  return records.map((row) => {
+    const result = row;
+    if (row.created_at) result.created_at = new Date(row.created_at).toLocaleDateString();
+    if (row.updated_at) result.updated_at = new Date(row.updated_at).toLocaleDateString();
+    return result;
+  });  
+}

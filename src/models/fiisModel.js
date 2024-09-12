@@ -1,4 +1,5 @@
 import db from '../db/index.js';
+import { updateTimeZone } from '../utils/utils.js';
 
 class FiisModel {
   constructor() {
@@ -9,12 +10,14 @@ class FiisModel {
     return db(this.table);
   }
 
-  getAll() {
-    return this.query().select('*').orderBy('ticker');
+  async getAll() {
+    const result = await this.query().select('*').orderBy('ticker');
+    return updateTimeZone(result);
   }
 
-  getOne(ticker) {
-    return this.query().select('*').where({ ticker }).first();
+  async getOne(ticker) {
+    const result = await this.query().select('*').where({ ticker }).first();
+    return updateTimeZone(result);
   }
 
   create(data) {
