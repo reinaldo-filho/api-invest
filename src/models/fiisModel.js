@@ -9,7 +9,20 @@ class FiisModel {
     return db(this.table);
   }
 
-  getAll() {
+  /**
+   * @typedef {Object} Options 
+   * @property {number} [page]
+   * @property {number} [limit]
+   * @returns 
+   */
+
+
+  /**
+   * 
+   * @param {Options} options 
+   * @returns 
+   */
+  getAll(options = {}) {
     return this.query().select('*').orderBy('ticker');
   }
 

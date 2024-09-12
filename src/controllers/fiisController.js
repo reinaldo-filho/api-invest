@@ -14,12 +14,12 @@ function tickerIsValid(ticker) {
 }
 
 const getAll = asyncHandler(async (_req, res) => {
-  const result = await fiisModel.getAll();
+  const result = await fiisModel.getAll({ page: 10 });
 
   if (result.length === 0)
     throw new NotFoundError('Não existe nenhum fundo cadastrado.');
 
-  const updatedResult = result.map( item => {
+  const updatedResult = result.map((item) => {
     item.created_at = utils.toLocalTimeZone(item.created_at);
     item.updated_at = utils.toLocalTimeZone(item.updated_at);
     return item;
@@ -57,10 +57,10 @@ const create = asyncHandler(async (req, res) => {
 const update = asyncHandler(async (req, res) => {
   let { ticker } = req.params;
   ticker = ticker.toUpperCase();
-  
+
   if (!tickerIsValid(ticker))
     throw new BadRequestError(`${ticker} não é um ticker válido.`);
-  
+
   const data = decamelizeKeys(req.body);
   const result = await fiisModel.update(ticker, data);
 
