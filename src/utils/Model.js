@@ -10,25 +10,42 @@ export default class Model {
 
   /**
    * Monta a parte inicial da query selecionando a tabela e criando joins se for o caso
-   * @returns {import("knex").Knex.QueryBuilder<any, any>}
+   * @returns {import("knex").Knex.QueryBuilder}
    */
   table() {
     return db(this.tableName);
   }
 
   /**
-   * @typedef {Object} FilterOptions
+   * @typedef {Object} QueryOptions
+   * @property {string|string[]|Object} [columns]
    * @property {number} [page]
    * @property {number} [limit]
    */
 
   /**
    * Retorna todos os registros da tabela (pode ser aplicado um filtro)
-   * @param {FilterOptions} options
-   * @returns
+   * @param {QueryOptions} options
+   * @returns {import("knex").Knex.QueryBuilder}
    */
   getAll(options = {}) {
-    return this.table().select('*').orderBy('ticker');
+    const {
+      columns = '*',
+      limit,
+      page
+    } = options;
+
+    const query = this.table().select(columns);
+
+    if (limit)
+      query.limit(limit);
+
+    if (page && limit){
+      const offset = (page - 1) * limit;
+      query.offset(offset);
+    }
+
+    return query;
   }
 
   getOne(ticker) {

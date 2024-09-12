@@ -6,7 +6,7 @@ import fiisModel from '../models/fiisModel.js';
 import { tickerIsValid } from '../utils/utils.js';
 
 const getAll = asyncHandler(async (_req, res) => {
-  const result = await fiisModel.getAll({ page: 10 });
+  const result = await fiisModel.getAll({});
 
   if (result.length === 0)
     throw new NotFoundError('Não existe nenhum fundo cadastrado.');
