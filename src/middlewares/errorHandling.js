@@ -17,7 +17,7 @@ export default (err, _req, res, _next) => {
       error.type = 'Database Error';
 
       if (config.isDevelopment) {
-        error.msg = err.message;
+        error.msg = err.message.replace(/"/g, '');
       } else {
         error.msg =
           'Verifique um possível erro de sintaxe ao tentar acessar este endpoint';

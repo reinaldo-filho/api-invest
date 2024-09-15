@@ -17,8 +17,8 @@ export function tickerIsValid(ticker) {
 export function updateTimeZone (records) {
   return records.map((row) => {
     const result = row;
-    if (row.created_at) result.created_at = new Date(row.created_at).toLocaleDateString();
-    if (row.updated_at) result.updated_at = new Date(row.updated_at).toLocaleDateString();
+    if (row.created_at) result.created_at = new Date(row.created_at).toLocaleString();
+    if (row.updated_at) result.updated_at = new Date(row.updated_at).toLocaleString();
     return result;
   });  
 }

@@ -1,5 +1,7 @@
+import camelcaseKeys from 'camelcase-keys';
+import decamelizeKeys from 'decamelize-keys';
 import db from '../db/index.js';
-import { updateTimeZone } from '../utils/utils.js';
+import { updateTimeZone } from './utils.js';
 
 export default class Model {
   /**
@@ -19,21 +21,23 @@ export default class Model {
 
   /**
    * @typedef {Object} QueryOptions
-   * @property {string|string[]|Object} [columns]
+   * @property {string | string[] | Object} [columns]
    * @property {number} [page]
    * @property {number} [limit]
+   * @property {string | number | Object} [order]
    */
 
   /**
    * Retorna todos os registros da tabela (pode ser aplicado um filtro)
    * @param {QueryOptions} options
-   * @returns {import("knex").Knex.QueryBuilder}
+   * @returns {Promise<Object[]>}
    */
-  getAll(options = {}) {
+  async getAll(options = {}) {
     const {
       columns = '*',
       limit,
-      page
+      page,
+      order,
     } = options;
 
     const query = this.table().select(columns);
@@ -46,7 +50,18 @@ export default class Model {
       query.offset(offset);
     }
 
-    return query;
+    if (order) {
+      if (typeof order === 'object') {
+        Object.entries(order).forEach( ([key, value]) => {
+          query.orderBy(key, value);
+        });     
+      } else {
+        query.orderBy(order);
+      }
+    }
+    
+    const result = await query;
+    return camelcaseKeys(updateTimeZone(result));
   }
 
   getOne(ticker) {
