@@ -62,14 +62,25 @@ export default class Model {
    * @returns {Promise<Object[] | undefined>} Retorna um array de objetos com os pares coluna/valor ou undefined
    */
   async getOne(filter) {
-    if (!(typeof filter === 'object') || (filter === null))
-      throw new TypeError('{filtro} deve ser do tipo Object.')
+    if (!(typeof filter === 'object') || filter === null)
+      throw new TypeError('{filtro} deve ser do tipo Object.');
 
     return camelcaseKeys(await this.table().select('*').where(filter).first());
   }
 
-  create(data) {
-    return this.table().insert(data).returning('*');
+  /**
+   * 
+   * @param {Object} data Objeto com par coluna/valor a ser inserido. 
+   * @param {boolean} [returnData] Se true (padrão), retorna os dados inseridos.
+   * @returns {Promise<Object[]>} Retorna um objeto com os valores inseridos.
+   */
+  async create(data, returnData = true) {
+    const query = this.table().insert(decamelizeKeys(data));
+
+    if (returnData) query.returning('*');
+
+    const result = await query;
+    return returnData ? result : [];
   }
 
   update(ticker, data) {
