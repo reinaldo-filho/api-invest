@@ -1,7 +1,6 @@
 import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 import db from '../db/index.js';
-import { updateTimeZone } from './utils.js';
 
 export default class Model {
   /**
@@ -28,44 +27,45 @@ export default class Model {
    */
 
   /**
-   * Retorna todos os registros da tabela (pode ser aplicado um filtro)
-   * @param {QueryOptions} options
-   * @returns {Promise<Object[]>}
+   * Retorna todos os registros da tabela
+   * @param {QueryOptions} options Opções passadas pela query do endereço http
+   * @returns {Promise<Object[] | undefined>} Retorna um array de objetos com os pares coluna/valor ou undefined
    */
   async getAll(options = {}) {
-    const {
-      columns = '*',
-      limit,
-      page,
-      order,
-    } = options;
+    const { columns = '*', limit, page, order } = options;
 
     const query = this.table().select(columns);
 
-    if (limit)
-      query.limit(limit);
+    if (limit) query.limit(limit);
 
-    if (page && limit){
+    if (page && limit) {
       const offset = (page - 1) * limit;
       query.offset(offset);
     }
 
     if (order) {
       if (typeof order === 'object') {
-        Object.entries(order).forEach( ([key, value]) => {
+        Object.entries(order).forEach(([key, value]) => {
           query.orderBy(key, value);
-        });     
+        });
       } else {
         query.orderBy(order);
       }
     }
-    
-    const result = await query;
-    return camelcaseKeys(updateTimeZone(result));
+
+    return camelcaseKeys(await query);
   }
 
-  getOne(ticker) {
-    return this.table().select('*').where({ ticker }).first();
+  /**
+   * Retorna um único registro do banco de dados
+   * @param {Object} filter Um objeto com pares coluna/valor para ser usado na clausula where
+   * @returns {Promise<Object[] | undefined>} Retorna um array de objetos com os pares coluna/valor ou undefined
+   */
+  async getOne(filter) {
+    if (!(typeof filter === 'object') || (filter === null))
+      throw new TypeError('{filtro} deve ser do tipo Object.')
+
+    return camelcaseKeys(await this.table().select('*').where(filter).first());
   }
 
   create(data) {

@@ -6,7 +6,7 @@ import { tickerIsValid } from '../utils/utils.js';
 const getAll = asyncHandler(async (req, res) => {
   const result = await fiisModel.getAll(req.query);
 
-  if (result.length === 0)
+  if (result === undefined)
     throw new NotFoundError('Não existe nenhum fundo cadastrado.');
 
   res.status(200).json(result);
@@ -19,7 +19,7 @@ const getOne = asyncHandler(async (req, res) => {
   if (!tickerIsValid(ticker))
     throw new BadRequestError(`${ticker} não é um ticker válido.`);
 
-  const result = await fiisModel.getOne(ticker);
+  const result = await fiisModel.getOne({ ticker });
 
   if (result === undefined)
     throw new NotFoundError(
