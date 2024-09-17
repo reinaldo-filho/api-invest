@@ -46,7 +46,7 @@ const update = asyncHandler(async (req, res) => {
     throw new BadRequestError(`${ticker} não é um ticker válido.`);
 
   const data = req.body;
-  const result = await fiisModel.update(ticker, data);
+  const result = await fiisModel.update({ ticker }, data);
 
   if (result.length === 0)
     throw new NotFoundError(

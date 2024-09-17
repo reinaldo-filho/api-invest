@@ -69,8 +69,8 @@ export default class Model {
   }
 
   /**
-   * 
-   * @param {Object} data Objeto com par coluna/valor a ser inserido. 
+   * Cria um novo registro no banco de dados
+   * @param {Object} data Objeto com par coluna/valor a ser inserido.
    * @param {boolean} [returnData] Se true (padrão), retorna os dados inseridos.
    * @returns {Promise<Object[]>} Retorna um objeto com os valores inseridos.
    */
@@ -83,8 +83,24 @@ export default class Model {
     return returnData ? result : [];
   }
 
-  update(ticker, data) {
-    return this.table().where({ ticker }).update(data).returning('*');
+  /**
+   * Altera os registro conforme filtro aplicado
+   * @param {Object} key Um objeto com pares coluna/valor para ser usado na clausula where
+   * @param {Object} data Objeto com par coluna/valor a ser inserido.
+   * @param {boolean} [returnData] Se true (padrão), retorna os dados alterados.
+   * @returns {Promise<Object[]>} Retorna um objeto com os valores alterados.
+   */
+  async update(key, data, returnData = true) {
+    const query = this.table().where(key);
+
+    if (returnData) {
+      query.update(decamelizeKeys(data), '*');
+    } else {
+      query.update(decamelizeKeys(data));
+    }
+
+    const result = await query;
+    return returnData ? result : [];
   }
 
   remove(ticker) {
