@@ -75,11 +75,7 @@ export default class Model {
    * @returns {Promise<Object[]>} Retorna um array com os registros inseridos ou [] se returnData = false
    */
   async create(data, returnData = true) {
-    const query = this.table().insert(decamelizeKeys(data));
-
-    if (returnData) query.returning('*');
-
-    const result = await query;
+    const result = await this.table().insert(decamelizeKeys(data), '*');
     return returnData ? result : [];
   }
 
@@ -91,19 +87,17 @@ export default class Model {
    * @returns {Promise<Object[]>} Retorna um array com os registros alterados ou [] se returnData = false.
    */
   async update(key, data, returnData = true) {
-    const query = this.table().where(key);
-
-    if (returnData) {
-      query.update(decamelizeKeys(data), '*');
-    } else {
-      query.update(decamelizeKeys(data));
-    }
-
-    const result = await query;
+    const result = await this.table().where(key).update(decamelizeKeys(data), '*');
     return returnData ? result : [];
   }
 
-  remove(ticker) {
-    return this.table().where({ ticker }).del();
+  /**
+   * Remove um registro do banco de dados
+   * @param {Object} key Um objeto com pares coluna/valor para ser usado na clausula where
+   * @returns {Promise<number>} O número de registros excluidos
+   */
+  async delete(key) {
+    const result = await this.table().where(key).del();
+    return result;
   }
 }
