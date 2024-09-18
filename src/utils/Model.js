@@ -72,7 +72,7 @@ export default class Model {
    * Cria um novo registro no banco de dados
    * @param {Object} data Objeto com par coluna/valor a ser inserido.
    * @param {boolean} [returnData] Se true (padrão), retorna os dados inseridos.
-   * @returns {Promise<Object[]>} Retorna um objeto com os valores inseridos.
+   * @returns {Promise<Object[]>} Retorna um array com os registros inseridos ou [] se returnData = false
    */
   async create(data, returnData = true) {
     const query = this.table().insert(decamelizeKeys(data));
@@ -88,7 +88,7 @@ export default class Model {
    * @param {Object} key Um objeto com pares coluna/valor para ser usado na clausula where
    * @param {Object} data Objeto com par coluna/valor a ser inserido.
    * @param {boolean} [returnData] Se true (padrão), retorna os dados alterados.
-   * @returns {Promise<Object[]>} Retorna um objeto com os valores alterados.
+   * @returns {Promise<Object[]>} Retorna um array com os registros alterados ou [] se returnData = false.
    */
   async update(key, data, returnData = true) {
     const query = this.table().where(key);
