@@ -87,6 +87,9 @@ export default class Model {
    * @returns {Promise<Object[]>} Retorna um array com os registros alterados ou [] se returnData = false.
    */
   async update(key, data, returnData = true) {
+    if (!(typeof key === 'object') || key === null)
+      throw new TypeError('{key} deve ser do tipo Object.');
+
     const result = await this.table().where(key).update(decamelizeKeys(data), '*');
     return returnData ? result : [];
   }
@@ -96,7 +99,10 @@ export default class Model {
    * @param {Object} key Um objeto com pares coluna/valor para ser usado na clausula where
    * @returns {Promise<number>} O número de registros excluidos
    */
-  async delete(key) {
+  async remove(key) {
+    if (!(typeof key === 'object') || key === null)
+      throw new TypeError('{key} deve ser do tipo Object.');
+
     const result = await this.table().where(key).del();
     return result;
   }

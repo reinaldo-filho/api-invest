@@ -58,25 +58,25 @@ const update = asyncHandler(async (req, res) => {
 
 const remove = asyncHandler(async (req, res) => {
   let { ticker } = req.params;
-  ticker = ticker.toUpperCase();  
+  ticker = ticker.toUpperCase();
 
   if (!tickerIsValid(ticker))
     throw new BadRequestError(`${ticker} não é um ticker válido.`);
 
-  const result = await fiisModel.delete(ticker);
+  const result = await fiisModel.remove({ ticker });
 
   if (!result || result < 1)
     throw new NotFoundError(
       `O fundo de investimento ${ticker} não foi encontrado.`,
     );
 
-  res.status(204).json(result);
-})
+  res.status(204).send(result);
+});
 
 export default {
   getAll,
   getOne,
   create,
   update,
-  remove
+  remove,
 };
